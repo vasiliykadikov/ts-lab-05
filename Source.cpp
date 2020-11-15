@@ -26,7 +26,6 @@ double find_min_dikh(std::map<double, double>& _map, double& a, double& b) { //a
     double xL, xR;
     double min_L, min_R;
     double w0 = 0;
-
     while ((b - a) > eps) {
         xL = 0.5 * (b + a) - delta;
         xR = 0.5 * (b + a) + delta;
@@ -43,11 +42,12 @@ double find_min_dikh(std::map<double, double>& _map, double& a, double& b) { //a
         return b;
     }
 }
-double find_min_gold(std::map<double, double>& _map, double& a, double& b, double& w1) { //a=dmin, b = dmax
+double find_min_gold(std::map<double, double>& _map, double& a, double& b) { //a=dmin, b = dmax
     const double t = 0.5 * (1 + std::sqrt(5));
     const double eps = 0.01;
     double xL = a + (1 - 1 / t) * b;
     double xR = a + b / t;
+    double w1 = 0;
     while ((b - a) > eps) {
         if (min_square(_map, w1, xL) < min_square(_map, w1, xR)) {
             b = xR;
@@ -80,9 +80,9 @@ int main() {
     double error;
     for (auto i = 0; i < N + 1; ++i) {
         x_t.insert(std::make_pair((a + i * x_step), _function(c, d, (a + i * x_step))));
-        error = A * fRand(-0.5, 0.5);
-        x_t_er.insert(std::make_pair(((a + i * x_step) * error),
-            _function(c, d, (a + i * x_step) * error)));
+            error = A * fRand(-0.5, 0.5);
+        x_t_er.insert(std::make_pair((a + i * x_step),
+            _function(c, d, (a + i * x_step) + error)));
     }
     double cmin; // values c, d in f(x) = cx + d
     double cmax;
@@ -107,7 +107,7 @@ int main() {
     dmin = it_x_t_begin->first;
     dmax = it_x_t_end->first;
     c = find_min_dikh(x_t, cmin, cmax);
-    d = find_min_gold(x_t, dmin, dmax, c);
+    d = find_min_gold(x_t, dmin, dmax);
     std::cout << "without errors: c=" << c << " d=" << d;
     std::map<double, double>::iterator it_x_t_er_begin = x_t_er.begin();
     std::map<double, double>::reverse_iterator it_x_t_er_end = x_t_er.rbegin();
@@ -128,7 +128,7 @@ int main() {
     dmin = it_x_t_er_begin->first;
     dmax = it_x_t_er_end->second;
     c = find_min_dikh(x_t_er, cmin, cmax);
-    d = find_min_gold(x_t_er, dmin, dmax, c);
+    d = find_min_gold(x_t_er, dmin, dmax);
     std::cout << "\nwith errors: c=" << c << " d=" << d;
     return 0;
 }
